@@ -1,0 +1,13 @@
+/minimu9-ahrs
+/minimu9-rpi-ahrs
+*.d
+*.o
+*~
+\#*\#
+*.gch
+*.config
+*.creator*
+*.files
+*.includes
+*.autosave
+/docs
