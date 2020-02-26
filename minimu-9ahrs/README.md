@@ -1,6 +1,6 @@
 # minimu9-ahrs
 
-## Disclaimer:
+**Disclaimer:**
 This folder contains files created by DavidEGrayson. This has been cloned into this respository as we modified the minimu-9ahrs.cpp file to output a CSV.
 
 Original repository at: minimu-9ahrs I2C connection: https://github.com/DavidEGrayson/minimu9-ahrs.git
