@@ -1,29 +1,5 @@
-Chilkat C/C++ Library Downloads
-MS Visual C/C++
-
-Linux/CentOS C/C++
-
-Alpine Linux C/C++
-
-MAC OS X C/C++
-
-armhf/aarch64 C/C++
-
-C++ Builder
-
-iOS C/C++
-
-Android C/C++
-
-Win Mobile 5.0/Pocket PC 2003
-
-Solaris C/C++
-
-FreeBSD C/C++
-
-OpenBSD C/C++
-
-MinGW C/C++
+// Original file from Chilkat C/C++ Library Downloads
+// See more at: https://www.example-code.com/cpp/google_sheets_update.asp
 
 #include <CkJsonObject.h>
 #include <CkHttp.h>
