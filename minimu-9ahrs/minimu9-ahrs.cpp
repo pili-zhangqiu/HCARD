@@ -74,11 +74,12 @@ void stream_raw_values(imu & imu)
   while(1)
   {
     imu.read_raw();
-    printf("%7d %7d %7d  %7d %7d %7d  %7d %7d %7d\n",
+    printf("hi%7d %7d %7d  %7d %7d %7d  %7d %7d %7d\n",
            imu.m[0], imu.m[1], imu.m[2],
            imu.a[0], imu.a[1], imu.a[2],
            imu.g[0], imu.g[1], imu.g[2]
       );
+
     /* save the above data into CSV */
     ofstream dataCSV;
     string filename="test";
@@ -86,6 +87,7 @@ void stream_raw_values(imu & imu)
     int counter=0;
 
     nameBuffer << filename << counter <<".csv";
+    cout <<"Writing to:"<<nameBuffer.str()<<endl;
     dataCSV.open(nameBuffer.str()); //create CSV file "test0.csv"
     //-------writing data into CSV-------
 
@@ -93,6 +95,7 @@ void stream_raw_values(imu & imu)
             << fixed << setprecision(4) << imu.a[0] << ","<< fixed << setprecision(4) << imu.a[1] << ","<< fixed << setprecision(4) << imu.a[2] << ","
             << fixed << setprecision(4) << imu.g[0] << ","<< fixed << setprecision(4) << imu.g[1] << ","<< fixed << setprecision(4) << imu.g[2] << ","<<endl;
 
+    dataCSV.close();
     cout <<"Data written to:"<<nameBuffer.str()<<endl;
 
     usleep(20*1000);
