@@ -23,6 +23,7 @@
 #include <fstream>
 
 //HCARD
+/*
 #include<conio.h>
 
 int main()
@@ -38,7 +39,7 @@ int main()
         std::cout<<a/7;
         a=b*10;
         b=a%7;
-
+/**/
 //HCARD END
 
 // TODO: print warning if accelerometer magnitude is not close to 1 when starting up
@@ -96,7 +97,7 @@ void stream_raw_values(imu & imu)
     printf("hi%7d %7d %7d  %7d %7d %7d  %7d %7d %7d\n",
            imu.m[0], imu.m[1], imu.m[2],
            imu.a[0], imu.a[1], imu.a[2],
-           imu.g[0], imu.g[1], imu.g[2],222222222 //HCARD END
+           imu.g[0], imu.g[1], imu.g[2] //HCARD END
       );
 
     /* save the above data into CSV */
@@ -347,9 +348,11 @@ int main(int argc, char ** argv)
 }
 
 //HCARD
+/*
               if(std::chrono::steady_clock::now() - start > std::chrono::seconds(15)) 
             break;
     }
     getch();
     return 0;
 }
+/**/
