@@ -1,5 +1,11 @@
 # minimu9-ahrs
 
+## Disclaimer:
+This folder contains files created by DavidEGrayson. This has been cloned into this respository as we modified the minimu-9ahrs.cpp file to output a CSV.
+
+Original repository at: minimu-9ahrs I2C connection: https://github.com/DavidEGrayson/minimu9-ahrs.git
+
+## Introduction:
 **minimu9-ahrs** is a program for reading sensor data from the Pololu MinIMU-9
 and similar boards over I²C.  It supports the following sensor chips:
 
