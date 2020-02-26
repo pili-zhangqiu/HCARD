@@ -1,6 +1,5 @@
-# HCARD
-Cerebral Palsy Assessment Device - For Babies
-------
+# HCARD - Cerebral Palsy Assessment Device For Babies
+
 ## Communication Protocol:
 The RPi Zero is connected to the computer through SSH. Both devices are currently connected to the Samsung S9+ hoptspot:
   - Connection name: PiliZQ
