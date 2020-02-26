@@ -1,7 +1,7 @@
 # HCARD - Cerebral Palsy Assessment Device For Babies
 This is a project from students at Imperial College London, under the module of H-CARD (Bioengineering Department).
 
-Authors:
+**Authors:**
   - Xian Zhang
   - Pilar Zhang Qiu
   - Zoe Chu
