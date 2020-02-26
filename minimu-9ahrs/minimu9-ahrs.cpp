@@ -22,6 +22,25 @@
 #include <chrono>
 #include <fstream>
 
+//HCARD
+#include<conio.h>
+
+int main()
+{
+    clrscr();
+    int a=1;
+    int b;
+    std::cout<<"3."; //Don't use 'using namespace std;'...
+    b=a*10%7;
+    std::chrono::steady_clock::timepoint start = std::chrono::steady_clock::now();
+    while(b!=0)
+    {
+        std::cout<<a/7;
+        a=b*10;
+        b=a%7;
+
+//HCARD END
+
 // TODO: print warning if accelerometer magnitude is not close to 1 when starting up
 
 // An Euler angle could take 8 chars: -234.678, but usually we only need 6.
@@ -325,4 +344,12 @@ int main(int argc, char ** argv)
     std::cerr << "Error: " << error.what() << std::endl;
     return 9;
   }
+}
+
+//HCARD
+              if(std::chrono::steady_clock::now() - start > std::chrono::seconds(15)) 
+            break;
+    }
+    getch();
+    return 0;
 }
