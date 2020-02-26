@@ -2,6 +2,19 @@ import os
 import sys
 import time
 
+stop_time = time.time() + 10
+
+try:
+    while time.time() < stop_time:
+            os.system("minimu9-ahrs --mode raw > output_supinate.csv")
+
+except KeyboardInterrupt:
+    pass
+
+sys.stdout.write("Exiting")
+sys.exit(0)
+
+'''
 os.system("minimu9-ahrs --mode raw > output_supinate.csv")
 sys.stdout.write("Recording...")
 
@@ -10,7 +23,7 @@ time.sleep(1)  # In seconds
 sys.stdout.write("Exiting")
 sys.exit(0)
 sys.stdout.write("Exited")
-
+'''
 
 '''
 def job():
