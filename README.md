@@ -1,4 +1,13 @@
 # HCARD - Cerebral Palsy Assessment Device For Babies
+This is a project from students at Imperial College London, under the module of H-CARD (Bioengineering Department).
+
+Authors:
+  - Xian Zhang
+  - Pilar Zhang Qiu
+  - Zoe Chu
+  - Mun Han
+  - Samradnyee Kolas
+  - Ryan Satnarine
 
 ## Communication Protocol:
 The RPi Zero is connected to the computer through SSH. Both devices are currently connected to the Samsung S9+ hoptspot:
