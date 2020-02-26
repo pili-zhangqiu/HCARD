@@ -4,6 +4,16 @@ import time
 
 stop_time = time.time() + 10
 
+while time.time() < stop_time:
+    os.system("minimu9-ahrs --mode raw > output_supinate1.csv")
+        
+except KeyboardInterrupt:
+    pass
+
+
+'''
+stop_time = time.time() + 10
+
 os.system("minimu9-ahrs --mode raw > output_supinate1.csv")
 
 try:
@@ -15,6 +25,7 @@ except KeyboardInterrupt:
 
 sys.stdout.write("Exiting")
 sys.exit(0)
+'''
 
 '''
 os.system("minimu9-ahrs --mode raw > output_supinate.csv")
