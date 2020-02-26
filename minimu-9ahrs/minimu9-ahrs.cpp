@@ -9,6 +9,9 @@
 #include "pacer.h"
 #include <iostream>
 #include <iomanip>
+#include <string>
+#include <sstream>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -17,6 +20,7 @@
 #include <pthread.h>
 #include <system_error>
 #include <chrono>
+#include <fstream>
 
 // TODO: print warning if accelerometer magnitude is not close to 1 when starting up
 
@@ -75,6 +79,22 @@ void stream_raw_values(imu & imu)
            imu.a[0], imu.a[1], imu.a[2],
            imu.g[0], imu.g[1], imu.g[2]
       );
+    /* save the above data into CSV */
+    ofstream dataCSV;
+    string filename="test";
+    stringstream nameBuffer;
+    int counter=0;
+
+    nameBuffer << filename << counter <<".csv";
+    dataCSV.open(nameBuffer.str()); //create CSV file "test0.csv"
+    //-------writing data into CSV-------
+
+    dataCSV << fixed << setprecision(4) << imu.m[0] << "," << fixed << setprecision(4) << imu.m[1] << ","<< fixed << setprecision(4) << imu.m[2] << ","
+            << fixed << setprecision(4) << imu.a[0] << ","<< fixed << setprecision(4) << imu.a[1] << ","<< fixed << setprecision(4) << imu.a[2] << ","
+            << fixed << setprecision(4) << imu.g[0] << ","<< fixed << setprecision(4) << imu.g[1] << ","<< fixed << setprecision(4) << imu.g[2] << ","<<endl;
+
+    cout <<"Data written to:"<<nameBuffer.str()<<endl;
+
     usleep(20*1000);
   }
 }
