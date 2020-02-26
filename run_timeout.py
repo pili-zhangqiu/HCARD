@@ -3,8 +3,14 @@ import sys
 import time
 
 os.system("minimu9-ahrs --mode raw > output_supinate.csv")
-time.sleep(15)  # In seconds
+sys.stdout.write("Recording...")
+
+time.sleep(1)  # In seconds
+
+sys.stdout.write("Exiting")
 sys.exit(0)
+sys.stdout.write("Exited")
+
 
 '''
 def job():
