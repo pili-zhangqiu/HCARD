@@ -6,9 +6,6 @@ stop_time = time.time() + 10
 
 while time.time() < stop_time:
     os.system("minimu9-ahrs --mode raw > output_supinate1.csv")
-        
-except KeyboardInterrupt:
-    pass
 
 
 '''
