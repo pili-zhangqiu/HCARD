@@ -1,402 +1,327 @@
+// For efficiency in compiling, this is the only file that uses the
+// Eigen lirbary and the 'vector' type we made from it.
+
 #include "vector.h"
+#include "version.h"
+#include "prog_options.h"
 #include "minimu9.h"
 #include "exceptions.h"
-#include <stdio.h>
-#include <unistd.h>
+#include "pacer.h"
 #include <iostream>
+#include <iomanip>
+#include <string>
+#include <sstream>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
+#include <sys/time.h>
+#include <pthread.h>
+#include <system_error>
+#include <chrono>
 #include <fstream>
-#include <wordexp.h>
 
-minimu9::comm_config minimu9::auto_detect(const std::string & i2c_bus_name)
+// TODO: print warning if accelerometer magnitude is not close to 1 when starting up
+
+// An Euler angle could take 8 chars: -234.678, but usually we only need 6.
+float field_width = 6;
+#define FLOAT_FORMAT std::fixed << std::setprecision(3) << std::setw(field_width)
+
+std::ostream & operator << (std::ostream & os, const vector & vector)
 {
-  i2c_bus bus(i2c_bus_name.c_str());
-  minimu9::comm_config config;
-
-  // Detect LSM6 devices.
-  {
-    auto addrs = { lsm6::SA0_LOW_ADDR, lsm6::SA0_HIGH_ADDR };
-    for (uint8_t addr : addrs)
-    {
-      int result = bus.try_write_byte_and_read_byte(addr, lsm6::WHO_AM_I);
-      if (result == lsm6::LSM6DS33)
-      {
-        config.lsm6.use_sensor = true;
-        config.lsm6.device = (lsm6::device_type)result;
-        config.lsm6.i2c_bus_name = i2c_bus_name;
-        config.lsm6.i2c_address = (lsm6::i2c_addr)addr;
-        break;
-      }
-    }
-  }
-
-  // Detect LIS3MDL devices.
-  {
-    auto addrs = { lis3mdl::SA1_LOW_ADDR, lis3mdl::SA1_HIGH_ADDR };
-    for (uint8_t addr : addrs)
-    {
-      int result = bus.try_write_byte_and_read_byte(addr, lis3mdl::WHO_AM_I);
-      if (result == lis3mdl::LIS3MDL)
-      {
-        config.lis3mdl.use_sensor = true;
-        config.lis3mdl.device = (lis3mdl::device_type)result;
-        config.lis3mdl.i2c_bus_name = i2c_bus_name;
-        config.lis3mdl.i2c_address = (lis3mdl::i2c_addr)addr;
-        break;
-      }
-    }
-  }
-
-  // Detect L3G devices.
-  {
-    auto addrs = {
-      l3g::L3GD20_SA0_LOW_ADDR,
-      l3g::L3GD20_SA0_HIGH_ADDR,
-      l3g::L3G4200D_SA0_LOW_ADDR,
-      l3g::L3G4200D_SA0_HIGH_ADDR,
-    };
-    for (uint8_t addr : addrs)
-    {
-      int result = bus.try_write_byte_and_read_byte(addr, l3g::WHO_AM_I);
-      if (result == l3g::L3G4200D || result == l3g::L3GD20
-        || result == l3g::L3GD20H)
-      {
-        config.l3g.use_sensor = true;
-        config.l3g.device = (l3g::device_type)result;
-        config.l3g.i2c_bus_name = i2c_bus_name;
-        config.l3g.i2c_address = (l3g::i2c_addr)addr;
-        break;
-      }
-    }
-  }
-
-  // Detect LSM303 devices.
-  {
-    auto & c = config.lsm303;
-    if (lsm303::LSM303D == bus.try_write_byte_and_read_byte(
-        lsm303::LSM303D_SA0_HIGH_ADDR, lsm303::WHO_AM_I))
-    {
-      c.use_sensor = true;
-      c.device = lsm303::LSM303D;
-      c.i2c_bus_name = i2c_bus_name;
-      c.i2c_address_acc = c.i2c_address_mag =
-        lsm303::LSM303D_SA0_HIGH_ADDR;
-    }
-    else if (lsm303::LSM303D == bus.try_write_byte_and_read_byte(
-        lsm303::LSM303D_SA0_LOW_ADDR, lsm303::WHO_AM_I))
-    {
-      c.use_sensor = true;
-      c.device = lsm303::LSM303D;
-      c.i2c_bus_name = i2c_bus_name;
-      c.i2c_address_acc = c.i2c_address_mag =
-        lsm303::LSM303D_SA0_LOW_ADDR;
-    }
-    // Remaining possibilities: LSM303DLHC, LSM303DLM, or LSM303DLH.
-    //
-    // LSM303DLHC seems to respond to WHO_AM_I request the same way as DLM, even
-    // though this register isn't documented in its datasheet, and LSM303DLH does
-    // not have a WHO_AM_I.
-    //
-    // Lets assume that if it's a LSM303DLM and LSM303DLH then SA0 is low,
-    // because that is how the Pololu boards pull that pin and this lets us
-    // distinguish between the LSM303DLHC and those other chips.
-    else if (bus.try_write_byte_and_read_byte(
-        lsm303::LSM303_NON_D_ACC_SA0_HIGH_ADDR, lsm303::CTRL_REG1_A) >= 0)
-    {
-      // There's an accelerometer on a chip with SA0 high, so by the
-      // logic above, guess that it's an LSM303DLHC.
-      c.use_sensor = true;
-      c.device = lsm303::LSM303DLHC;
-      c.i2c_bus_name = i2c_bus_name;
-      c.i2c_address_acc = lsm303::LSM303_NON_D_ACC_SA0_HIGH_ADDR;
-      c.i2c_address_mag = lsm303::LSM303_NON_D_MAG_ADDR;
-    }
-    // Remaining possibilities: LSM303DLM or LSM303DLH, SA0 assumed low.
-    else if (bus.try_write_byte_and_read_byte(
-        lsm303::LSM303_NON_D_ACC_SA0_LOW_ADDR, lsm303::CTRL_REG1_A) >= 0)
-    {
-      // Found the acceleromter for an LSM303DLM or LSM303DLH.
-      // Use the WHO_AM_I register to distinguish the two.
-
-      int result = bus.try_write_byte_and_read_byte(
-        lsm303::LSM303_NON_D_MAG_ADDR, lsm303::WHO_AM_I_M);
-
-      if (result == lsm303::LSM303DLM)
-      {
-        // Detected LSM303DLM with SA0 low.
-        c.use_sensor = true;
-        c.device = lsm303::LSM303DLM;
-        c.i2c_bus_name = i2c_bus_name;
-        c.i2c_address_acc = lsm303::LSM303_NON_D_ACC_SA0_LOW_ADDR;
-        c.i2c_address_mag = lsm303::LSM303_NON_D_MAG_ADDR;
-      }
-      else
-      {
-        // Guess that it's an LSM303DLH with SA0 low.
-        c.use_sensor = true;
-        c.device = lsm303::LSM303DLH;
-        c.i2c_bus_name = i2c_bus_name;
-        c.i2c_address_acc = lsm303::LSM303_NON_D_ACC_SA0_LOW_ADDR;
-        c.i2c_address_mag = lsm303::LSM303_NON_D_MAG_ADDR;
-      }
-    }
-  }
-
-  return config;
+  return os << FLOAT_FORMAT << vector(0) << ' '
+            << FLOAT_FORMAT << vector(1) << ' '
+            << FLOAT_FORMAT << vector(2);
 }
 
-sensor_set minimu9::config_sensor_set(const comm_config & config)
+std::ostream & operator << (std::ostream & os, const matrix & matrix)
 {
+  return os << (vector)matrix.row(0) << ' '
+            << (vector)matrix.row(1) << ' '
+            << (vector)matrix.row(2);
+}
+
+std::ostream & operator << (std::ostream & os, const quaternion & quat)
+{
+  return os << FLOAT_FORMAT << quat.w() << ' '
+            << FLOAT_FORMAT << quat.x() << ' '
+            << FLOAT_FORMAT << quat.y() << ' '
+            << FLOAT_FORMAT << quat.z();
+}
+
+typedef void rotation_output_function(quaternion & rotation);
+
+void output_quaternion(quaternion & rotation)
+{
+  std::cout << rotation;
+}
+
+void output_matrix(quaternion & rotation)
+{
+  std::cout << rotation.toRotationMatrix();
+}
+
+void output_euler(quaternion & rotation)
+{
+  std::cout << (vector)(rotation.toRotationMatrix().eulerAngles(2, 1, 0)
+                        * (180 / M_PI));
+}
+
+void stream_raw_values(imu & imu)
+{
+  imu.enable();
+  while(1)
+  {
+    imu.read_raw();
+    printf("%7d %7d %7d  %7d %7d %7d  %7d %7d %7d\n",
+           imu.m[0], imu.m[1], imu.m[2],
+           imu.a[0], imu.a[1], imu.a[2],
+           imu.g[0], imu.g[1], imu.g[2]
+    );
+
+    /* save the above data into CSV */
+    ofstream dataCSV;
+    string filename="test";
+    stringstream nameBuffer;
+    int counter=0;
+
+    nameBuffer << filename << counter <<".csv";
+    dataCSV.open(nameBuffer.str()); //create CSV file "test0.csv"
+    //-------writing data into CSV-------
+
+    dataCSV << fixed << setprecision(4) << imu.m[0] << "," << fixed << setprecision(4) << imu.m[1] << ","<< fixed << setprecision(4) << imu.m[2] << ","
+            << fixed << setprecision(4) << imu.a[0] << ","<< fixed << setprecision(4) << imu.a[1] << ","<< fixed << setprecision(4) << imu.a[2] << ","
+            << fixed << setprecision(4) << imu.g[0] << ","<< fixed << setprecision(4) << imu.g[1] << ","<< fixed << setprecision(4) << imu.g[2] << ","<<endl;
+
+    cout <<"Data written to:"<<nameBuffer.str()<<endl;
+
+
+    usleep(20*1000);
+  }
+}
+
+//! Uses the acceleration and magnetic field readings from the compass
+// to get a noisy estimate of the current rotation matrix.
+// This function is where we define the coordinate system we are using
+// for the ground coords:  North, East, Down.
+matrix rotation_from_compass(const vector & acceleration, const vector & magnetic_field)
+{
+  vector down = -acceleration;     // usually true
+  vector east = down.cross(magnetic_field); // actually it's magnetic east
+  vector north = east.cross(down);
+
+  east.normalize();
+  north.normalize();
+  down.normalize();
+
+  matrix r;
+  r.row(0) = north;
+  r.row(1) = east;
+  r.row(2) = down;
+  return r;
+}
+
+typedef void fuse_function(quaternion & rotation, float dt, const vector & angular_velocity,
+                           const vector & acceleration, const vector & magnetic_field);
+
+void fuse_compass_only(quaternion & rotation, float dt, const vector& angular_velocity,
+                       const vector & acceleration, const vector & magnetic_field)
+{
+  // Implicit conversion of rotation matrix to quaternion.
+  rotation = rotation_from_compass(acceleration, magnetic_field);
+}
+
+// Uses the given angular velocity and time interval to calculate
+// a rotation and applies that rotation to the given quaternion.
+// w is angular velocity in radians per second.
+// dt is the time.
+void rotate(quaternion & rotation, const vector & w, float dt)
+{
+  // Multiply by first order approximation of the
+  // quaternion representing this rotation.
+  rotation *= quaternion(1, w(0)*dt/2, w(1)*dt/2, w(2)*dt/2);
+  rotation.normalize();
+}
+
+void fuse_gyro_only(quaternion & rotation, float dt, const vector & angular_velocity,
+                    const vector & acceleration, const vector & magnetic_field)
+{
+  rotate(rotation, angular_velocity, dt);
+}
+
+void fuse_default(quaternion & rotation, float dt, const vector & angular_velocity,
+                  const vector & acceleration, const vector & magnetic_field)
+{
+  vector correction = vector(0, 0, 0);
+
+  if (fabs(acceleration.norm() - 1) <= 0.3)
+  {
+    // The magnetidude of acceleration is close to 1 g, so
+    // it might be pointing up and we can do drift correction.
+
+    const float correction_strength = 1;
+
+    matrix rotation_compass = rotation_from_compass(acceleration, magnetic_field);
+    matrix rotation_matrix = rotation.toRotationMatrix();
+
+    correction = (
+                         rotation_compass.row(0).cross(rotation_matrix.row(0)) +
+                         rotation_compass.row(1).cross(rotation_matrix.row(1)) +
+                         rotation_compass.row(2).cross(rotation_matrix.row(2))
+                 ) * correction_strength;
+
+  }
+
+  rotate(rotation, angular_velocity + correction, dt);
+}
+
+void ahrs(imu & imu, fuse_function * fuse, rotation_output_function * output)
+{
+  imu.load_calibration();
+  imu.enable();
+  imu.measure_offsets();
+
+  // The quaternion that can convert a vector in body coordinates
+  // to ground coordinates when it its changed to a matrix.
+  quaternion rotation = quaternion::Identity();
+
+  // Set up a timer that expires every 20 ms.
+  pacer loop_pacer;
+  loop_pacer.set_period_ns(20000000);
+
+  auto start = std::chrono::steady_clock::now();
+  while(1)
+  {
+    auto last_start = start;
+    start = std::chrono::steady_clock::now();
+    std::chrono::nanoseconds duration = start - last_start;
+    float dt = duration.count() / 1e9;
+    if (dt < 0){ throw std::runtime_error("Time went backwards."); }
+
+    vector angular_velocity = imu.read_gyro();
+    vector acceleration = imu.read_acc();
+    vector magnetic_field = imu.read_mag();
+
+    fuse(rotation, dt, angular_velocity, acceleration, magnetic_field);
+
+    output(rotation);
+    std::cout << "  " << acceleration << "  " << magnetic_field << std::endl;
+
+    loop_pacer.pace();
+  }
+}
+
+int main_with_exceptions(int argc, char **argv)
+{
+  prog_options options = get_prog_options(argc, argv);
+
+  if(options.show_help)
+  {
+    print_command_line_options_desc();
+    std::cout << "For more information, run: man minimu9-ahrs" << std::endl;
+    return 0;
+  }
+
+  if (options.show_version)
+  {
+    std::cout << VERSION << std::endl;
+    return 0;
+  }
+
+  // Decide what sensors we want to use.
   sensor_set set;
+  set.mag = set.acc = set.gyro = true;
 
-  if (config.lsm6.use_sensor)
+  minimu9::comm_config config = minimu9::auto_detect(options.i2c_bus_name);
+
+  sensor_set missing = set - minimu9::config_sensor_set(config);
+  if (missing)
   {
-    set.acc = true;
-    set.gyro = true;
+    if (missing.mag)
+    {
+      std::cerr << "Error: No magnetometer found." << std::endl;
+    }
+    if (missing.acc)
+    {
+      std::cerr << "Error: No accelerometer found." << std::endl;
+    }
+    if (missing.gyro)
+    {
+      std::cerr << "Error: No gyro found." << std::endl;
+    }
+    std::cerr << "Error: Needed sensors are missing." << std::endl;
+    return 1;
   }
 
-  if (config.lis3mdl.use_sensor)
+  config = minimu9::disable_redundant_sensors(config, set);
+
+  minimu9::handle imu;
+  imu.open(config);
+
+  rotation_output_function * output;
+
+  // Figure out the output mode.
+  if (options.output_mode == "matrix")
   {
-    set.mag = true;
+    output = &output_matrix;
   }
-
-  if (config.lsm303.use_sensor)
+  else if (options.output_mode == "quaternion")
   {
-    set.mag = true;
-    set.acc = true;
+    output = &output_quaternion;
   }
-
-  if (config.l3g.use_sensor)
+  else if (options.output_mode == "euler")
   {
-    set.gyro = true;
-  }
-
-  return set;
-}
-
-minimu9::comm_config minimu9::disable_redundant_sensors(
-  const comm_config & in, const sensor_set & needed)
-{
-  comm_config config = in;
-
-  sensor_set missing = needed;
-
-  if (!(missing.acc || missing.gyro))
-  {
-    config.lsm6.use_sensor = false;
-  }
-  else if (config.lsm6.use_sensor)
-  {
-    missing.acc = false;
-    missing.gyro = false;
-  }
-
-  if (!missing.mag)
-  {
-    config.lis3mdl.use_sensor = false;
-  }
-  else if (config.lis3mdl.use_sensor)
-  {
-    missing.mag = false;
-  }
-
-  if (!(missing.mag || missing.acc))
-  {
-    config.lsm303.use_sensor = false;
-  }
-  else if (config.lsm303.use_sensor)
-  {
-    missing.mag = false;
-    missing.acc = false;
-  }
-
-  if (!missing.gyro)
-  {
-    config.l3g.use_sensor = false;
-  }
-  else if (config.l3g.use_sensor)
-  {
-    missing.gyro = false;
-  }
-
-  return config;
-}
-
-void minimu9::handle::open(const comm_config & config)
-{
-  this->config = config;
-
-  if (config.lsm6.use_sensor)
-  {
-    lsm6.open(config.lsm6);
-  }
-
-  if (config.lis3mdl.use_sensor)
-  {
-    lis3mdl.open(config.lis3mdl);
-  }
-
-  if (config.lsm303.use_sensor)
-  {
-    lsm303.open(config.lsm303);
-  }
-
-  if (config.l3g.use_sensor)
-  {
-    l3g.open(config.l3g);
-  }
-}
-
-void minimu9::handle::enable()
-{
-  if (config.lsm6.use_sensor)
-  {
-    lsm6.enable();
-  }
-
-  if (config.lis3mdl.use_sensor)
-  {
-    lis3mdl.enable();
-  }
-
-  if (config.lsm303.use_sensor)
-  {
-    lsm303.enable();
-  }
-
-  if (config.l3g.use_sensor)
-  {
-    l3g.enable();
-  }
-}
-
-void minimu9::handle::load_calibration()
-{
-  wordexp_t expansion_result;
-  wordexp("~/.minimu9-ahrs-cal", &expansion_result, 0);
-
-  std::ifstream file(expansion_result.we_wordv[0]);
-  if (file.fail())
-  {
-    throw posix_error("Failed to open calibration file ~/.minimu9-ahrs-cal");
-  }
-
-  file >> mag_min(0) >> mag_max(0)
-       >> mag_min(1) >> mag_max(1)
-       >> mag_min(2) >> mag_max(2);
-  if (file.fail() || file.bad())
-  {
-    throw std::runtime_error("Failed to parse calibration file ~/.minimu9-ahrs-cal");
-  }
-}
-
-void minimu9::handle::read_mag_raw()
-{
-  if (config.lis3mdl.use_sensor)
-  {
-    lis3mdl.read();
-    for (int i = 0; i < 3; i++) { m[i] = lis3mdl.m[i]; }
-  }
-  else if (config.lsm303.use_sensor)
-  {
-    lsm303.read_mag();
-    for (int i = 0; i < 3; i++) { m[i] = lsm303.m[i]; }
+    field_width += 2;  // See comment above for field_width.
+    output = &output_euler;
   }
   else
   {
-    throw std::runtime_error("No magnetometer to read.");
+    std::cerr << "Unknown output mode '" << options.output_mode << "'" << std::endl;
+    return 1;
   }
-}
 
-void minimu9::handle::read_acc_raw()
-{
-  if (config.lsm6.use_sensor)
+  // Figure out the basic operating mode and start running.
+  if (options.mode == "raw")
   {
-    lsm6.read_acc();
-    for (int i = 0; i < 3; i++) { a[i] = lsm6.a[i]; }
+    stream_raw_values(imu);
   }
-  else if (config.lsm303.use_sensor)
+  else if (options.mode == "gyro-only")
   {
-    lsm303.read_acc();
-    for (int i = 0; i < 3; i++) { a[i] = lsm303.a[i]; }
+    ahrs(imu, &fuse_gyro_only, output);
+  }
+  else if (options.mode == "compass-only")
+  {
+    ahrs(imu, &fuse_compass_only, output);
+  }
+  else if (options.mode == "normal")
+  {
+    ahrs(imu, &fuse_default, output);
   }
   else
   {
-    throw std::runtime_error("No accelerometer to read.");
+    std::cerr << "Unknown mode '" << options.mode << "'" << std::endl;
+    return 1;
   }
+  return 0;
 }
 
-void minimu9::handle::read_gyro_raw()
+int main(int argc, char ** argv)
 {
-  if (config.lsm6.use_sensor)
+  try
   {
-    lsm6.read_gyro();
-    for (int i = 0; i < 3; i++) { g[i] = lsm6.g[i]; }
+    main_with_exceptions(argc, argv);
   }
-  else if (config.l3g.use_sensor)
+  catch(const std::system_error & error)
   {
-    l3g.read();
-    for (int i = 0; i < 3; i++) { g[i] = l3g.g[i]; }
+    std::string what = error.what();
+    const std::error_code & code = error.code();
+    std::cerr << "Error: " << what << " (" << code << ")" << std::endl;
+    return 2;
   }
-  else
+  catch(const std::exception & error)
   {
-    throw std::runtime_error("No gyro to read.");
+    std::cerr << "Error: " << error.what() << std::endl;
+    return 9;
   }
-}
-
-float minimu9::handle::get_acc_scale() const
-{
-  // Info about linear acceleration sensitivity from datasheets:
-  // LSM303DLM: at FS = 8 g, 3.9 mg/digit (12-bit reading)
-  // LSM303DLHC: at FS = 8 g, 4 mg/digit (12-bit reading probably an approximation)
-  // LSM303DLH: at FS = 8 g, 3.9 mg/digit (12-bit reading)
-  // LSM303D: at FS = 8 g, 0.244 mg/LSB (16-bit reading)
-  // LSM6DS33: at FS = 8 g, 0.244 mg/LSB (16-bit reading)
-  return 0.000244;
-}
-
-float minimu9::handle::get_gyro_scale() const
-{
-  // Info about sensitivity from datasheets:
-  // L3G4200D, FS = 2000 dps: 70 mdps/digit
-  // L3GD20,   FS = 2000 dps: 70 mdps/digit
-  // L3GD20H,  FS = 2000 dps: 70 mdps/digit
-  // LSM6DS33, FS = 2000 dps: 70 mdps/digit
-  return 0.07 * 3.14159265 / 180;
-}
-
-void minimu9::handle::measure_offsets()
-{
-  // LSM303 accelerometer: 8 g sensitivity.  3.8 mg/digit; 1 g = 256.
-  gyro_offset = vector::Zero();
-  const int sampleCount = 32;
-  for(int i = 0; i < sampleCount; i++)
-  {
-    read_gyro_raw();
-    gyro_offset += vector_from_ints(&g);
-    usleep(20 * 1000);
-  }
-  gyro_offset /= sampleCount;
-}
-
-vector minimu9::handle::read_mag()
-{
-  read_mag_raw();
-
-  vector v;
-  v(0) = (float)(m[0] - mag_min(0)) / (mag_max(0) - mag_min(0)) * 2 - 1;
-  v(1) = (float)(m[1] - mag_min(1)) / (mag_max(1) - mag_min(1)) * 2 - 1;
-  v(2) = (float)(m[2] - mag_min(2)) / (mag_max(2) - mag_min(2)) * 2 - 1;
-  return v;
-}
-
-vector minimu9::handle::read_acc()
-{
-  read_acc_raw();
-  return vector_from_ints(&a) * get_acc_scale();
-}
-
-vector minimu9::handle::read_gyro()
-{
-  read_gyro_raw();
-  return (vector_from_ints(&g) - gyro_offset) * get_gyro_scale();
 }
