@@ -1,11 +1,6 @@
 import os
-import sys
-import time
 
-stop_time = time.time() + 10
-
-while time.time() < stop_time:
-    os.system("minimu9-ahrs --mode raw > output_supinate1.csv")
+os.system("minimu9-ahrs --mode raw > output_supinate1.csv")
 
 
 '''
