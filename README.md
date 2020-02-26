@@ -20,7 +20,9 @@ Current RPi IP in the connection above is: 192.168.43.250
   - The MCU used is the RPi Zero W, which embedded WiFi and BLE modules.
   - The IMU used is the Pololu Minimu-9 with 3-axis gyroscope, 3-axis accelerometer and 3-axis magnetometer.
 
-## Libraries used:
-Before starting the project, git clone the following libraries:
-  - minimu-9ahrs I2C connection: https://github.com/DavidEGrayson/minimu9-ahrs.git
-  - 
+## Stacks used:
+  - Flask: Python micro-framework for web server
+  - uWSGI: Application server for Flask
+  - Nginx: Lightweight web server
+  - Skeleton: UI look
+  
