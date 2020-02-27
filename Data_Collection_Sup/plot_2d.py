@@ -4,6 +4,9 @@ from matplotlib import style
 from mpl_toolkits.mplot3d import Axes3D
 
 filename = "180Sides_1.tsv"
+#filename = "180Top_1.tsv"
+#filename = "360Sides_1.tsv"
+#ilename = "360Top_1.tsv"
 data = np.loadtxt(filename)
 #skip row: skiprows=1
 #select columns: usecols =[0,1,2]
@@ -26,7 +29,7 @@ ax1.set_title('plot from file: '+filename+ ', data#' + str(len(x)+1))
 ax1.set_ylabel('x (roll)')
 
 ax2.plot(t,y)
-ax2.set_ylim((-180, 180))
+#ax2.set_ylim((-180, 180))
 ax2.set_ylabel('y (pitch)')
 
 ax3.plot(t,z)
