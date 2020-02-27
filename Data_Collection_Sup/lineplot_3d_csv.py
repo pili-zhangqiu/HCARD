@@ -15,9 +15,6 @@ ax = fig.add_subplot(111, projection='3d')
 x = np.asarray(data[:,1])
 y = np.asarray(data[:,2])
 z = np.asarray(data[:,3])
-print('length of x ',len(x))
-
-
 
 
 ax.plot(x, y, z, c='r', marker='o') #3d line plot
