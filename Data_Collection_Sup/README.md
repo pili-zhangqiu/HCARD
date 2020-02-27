@@ -1,4 +1,4 @@
 # Data Collection for Supination
 The file naming convention works as follows:
+<img src="https://drive.google.com/uc?export=view&id=1JSSspDr0BNdbemCVpfeapYzJI-4x2xxT" width="20%" height="20%">
 
-![image](https://drive.google.com/uc?export=view&id=1JSSspDr0BNdbemCVpfeapYzJI-4x2xxT){:height="30%" width="30%"}
