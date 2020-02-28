@@ -10,9 +10,11 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 filename_180S = "180Sides_1.tsv"
-filename_180T = "180Top_1.tsv"
 filename_360S = "360Sides_1.tsv"
+filename_180T = "180Top_1.tsv"
 filename_360T = "360Top_1.tsv"
+
+filename = [filename_180S, filename_360S, filename_180T, filename_360T]
 
 data_180S = np.loadtxt(filename_180S)
 data_360S = np.loadtxt(filename_360S)
