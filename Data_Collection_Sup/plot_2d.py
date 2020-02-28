@@ -39,7 +39,7 @@ for i in range(4):
     ax3 = plt.subplot(313)
 
     ax1.plot(t,x)
-    ax1.set_title('plot from file: '+filename+ ', data#' + str(len(x)+1))
+    ax1.set_title('plot from file: '+filename[i]+ ', data#' + str(len(x)+1))
     #total #of data points
     ax1.set_ylabel('x (roll)')
 
