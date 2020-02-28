@@ -48,4 +48,8 @@ plt.tight_layout()
 
 #plt.show()
 
-plt.savefig('foo.png',edgecolor='RED',transparent=True)
+for i in range(10):
+    ...................
+    ...................
+    num = "%i.png" % i
+    plt.savefig(num, format='png')
