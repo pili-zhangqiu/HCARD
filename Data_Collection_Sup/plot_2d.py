@@ -38,16 +38,16 @@ for i in range(4):
     ax2 = plt.subplot(312)
     ax3 = plt.subplot(313)
 
-    ax1.plot(t,x[i])
+    ax1.plot(t,x)
     ax1.set_title('plot from file: '+filename[i]+ ', data#' + str(len(x)+1))
     #total #of data points
     ax1.set_ylabel('x (roll)')
 
-    ax2.plot(t,y[i])
+    ax2.plot(t,y)
     #ax2.set_ylim((-180, 180))
     ax2.set_ylabel('y (pitch)')
 
-    ax3.plot(t,z[i])
+    ax3.plot(t,z)
     ax3.set_ylabel('z (yaw)')
 
     #plt.setp(ax1.get_xticklabels(), visible=False) #invisible x ticks for plot 1
