@@ -27,9 +27,9 @@ data = [data_180S, data_360S, data_180T, data_360T]
 
 for i in range(4):
     
-    x = np.asarray(data[i[:,0]])
-    y = np.asarray(data[i[:,1]])
-    z = np.asarray(data[i[:,2]])
+    x = np.asarray(data[i][:,0])
+    y = np.asarray(data[i][:,1])
+    z = np.asarray(data[i][:,2])
     t = np.arange(0.0, len(x))
 
     ax1 = plt.subplot(311)
