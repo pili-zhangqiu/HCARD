@@ -28,6 +28,9 @@ data = [data_180S, data_360S, data_180T, data_360T]
 #tsv file: delimiter = "\\t"
 
 for i in range(4):
+    x=[]    # empty arrays
+    y=[]
+    z=[]
     
     x = np.asarray(data[i][:,0])
     y = np.asarray(data[i][:,1])
