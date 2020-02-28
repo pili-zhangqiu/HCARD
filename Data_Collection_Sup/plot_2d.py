@@ -1,7 +1,8 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib import style
+import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D
+
 
 filename = "180Sides_1.tsv"
 #filename = "180Top_1.tsv"
@@ -12,10 +13,10 @@ data = np.loadtxt(filename)
 #select columns: usecols =[0,1,2]
 #tsv file: delimiter = "\\t"
 
-x = np.asarray(data[:,1])
+x = np.asarray(data[:,1]) #don't necessarily need np.asarray() function 
 y = np.asarray(data[:,2])
 z = np.asarray(data[:,3])
-t = np.linspace(0.0, len(x),len(x))
+t = np.arange(0.0, len(x))
 
 
 
@@ -26,6 +27,7 @@ ax3 = plt.subplot(313)
 
 ax1.plot(t,x)
 ax1.set_title('plot from file: '+filename+ ', data#' + str(len(x)+1))
+#total #of data points
 ax1.set_ylabel('x (roll)')
 
 ax2.plot(t,y)
@@ -36,7 +38,6 @@ ax3.plot(t,z)
 ax3.set_ylabel('z (yaw)')
 
 #plt.setp(ax1.get_xticklabels(), visible=False) #invisible x ticks for plot 1
-
 
 plt.tight_layout()
 plt.show()
