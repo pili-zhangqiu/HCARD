@@ -1,5 +1,9 @@
 import numpy as np
 from matplotlib import pyplot as plt
+
+# IMPORTANT to export figures w/o x-server
+matplotlib.use('Agg')
+
 import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -13,9 +17,9 @@ data = np.loadtxt(filename)
 #select columns: usecols =[0,1,2]
 #tsv file: delimiter = "\\t"
 
-x = np.asarray(data[:,1]) #don't necessarily need np.asarray() function 
-y = np.asarray(data[:,2])
-z = np.asarray(data[:,3])
+x = np.asarray(data[:,0]) #don't necessarily need np.asarray() function 
+y = np.asarray(data[:,1])
+z = np.asarray(data[:,2])
 t = np.arange(0.0, len(x))
 
 
@@ -40,4 +44,7 @@ ax3.set_ylabel('z (yaw)')
 #plt.setp(ax1.get_xticklabels(), visible=False) #invisible x ticks for plot 1
 
 plt.tight_layout()
-plt.show()
+
+#plt.show()
+
+plt.savefig('foo.png',edgecolor='RED',transparent=True)
