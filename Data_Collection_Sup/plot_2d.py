@@ -1,9 +1,10 @@
 import numpy as np
-from matplotlib import pyplot as plt
 
+import matplotlib
 # IMPORTANT to export figures w/o x-server
 matplotlib.use('Agg')
 
+import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D
 
