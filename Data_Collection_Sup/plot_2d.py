@@ -27,7 +27,7 @@ data = [data_180S, data_360S, data_180T, data_360T]
 #select columns: usecols =[0,1,2]
 #tsv file: delimiter = "\\t"
 
-for i in range(4):
+for i in range(2,4):
     x=[]    # empty arrays
     y=[]
     z=[]
