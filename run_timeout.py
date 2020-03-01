@@ -1,7 +1,10 @@
-import os
+#import os
+import subprocess
 
-os.system("minimu9-ahrs --mode raw > startup_test.tsv")
-
+raw_cmd = "minimu9-ahrs --mode raw > startup_test2.tsv"
+print("Recording... ", raw_cmd)
+answer = subprocess.call(raw_cmd, shell=True)
+#answer = os.system(raw_cmd)
 
 '''
 stop_time = time.time() + 10
