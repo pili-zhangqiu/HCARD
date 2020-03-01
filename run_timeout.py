@@ -1,6 +1,6 @@
 import os
 
-os.system("minimu9-ahrs --mode raw > output_supinate1.csv")
+os.system("minimu9-ahrs --mode raw > startup_test.tsv")
 
 
 '''
