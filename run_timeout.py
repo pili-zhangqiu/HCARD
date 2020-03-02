@@ -1,10 +1,20 @@
-#import os
+import os
 import subprocess
+import time
+import threading as thread
 
-raw_cmd = "minimu9-ahrs --mode raw > startup_test2.tsv"
+raw_cmd = "minimu9-ahrs --mode raw > startup_test3.tsv"
+
+
+tic = time.perf_counter() #time counter
+# print(tic)
 print("Recording... ", raw_cmd)
-answer = subprocess.call(raw_cmd, shell=True)
-#answer = os.system(raw_cmd)
+action = subprocess.Popen(raw_cmd, shell=True)
+action.wait(3)
+action.terminate()
+action.wait()
+toc = time.perf_counter()
+print(toc-tic)
 
 '''
 stop_time = time.time() + 10
