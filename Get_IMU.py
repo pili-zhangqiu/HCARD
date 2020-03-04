@@ -4,7 +4,7 @@ import time
 address = 0x6b
 #address2 = 0x1e
 
-print bus.read_byte_data(address, 0x0f) # Output 61
+#print bus.read_byte_data(address, 0x0f) # Output 61
 
 
 #CTRL1_XL 
