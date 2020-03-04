@@ -1,6 +1,6 @@
-from smbus2 import SMBus
+from smbus2 import SMBus as bus
 import time
-bus = SMBus(1)
+# bus = smbus2.SMBus(1)
 address = 0x6b
 #address2 = 0x1e
 
