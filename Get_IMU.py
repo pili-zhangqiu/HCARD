@@ -1,6 +1,6 @@
 from smbus2 import SMBus
 import time
-bus = smbus2.SMBus(1)
+bus = SMBus(1)
 address = 0x6b
 #address2 = 0x1e
 
@@ -11,7 +11,7 @@ address = 0x6b
 bus.write_byte_data(address,0x10,0b10100111)
 
 #CTRL2_G 
-bus.write_byte_data(address,0x11,0x00)
+bus.write_byte_data(address,0x11,0xb669ec48)
 
 #CTRL5_C 
 bus.write_byte_data(address,0x14,0b01100100)
@@ -55,4 +55,4 @@ while True:
         SensorData = readSensorData()     
         print(SensorData)
         #Output (-3980, 1206, 4994, 3, 100, 0)
-        time.sleep(0)
+        time.sleep(0.05)

@@ -9,7 +9,7 @@ import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D
 
 
-filename_180S = "180Sides_1.tsv"
+filename_180S = "output.tsv"
 filename_360S = "360Sides_1.tsv"
 filename_180T = "180Top_1.tsv"
 filename_360T = "360Top_1.tsv"
@@ -27,7 +27,7 @@ data = [data_180S, data_360S, data_180T, data_360T]
 #select columns: usecols =[0,1,2]
 #tsv file: delimiter = "\\t"
 
-for i in range(2,4):
+for i in range(1,3):
     x=[]    # empty arrays
     y=[]
     z=[]
