@@ -1,4 +1,4 @@
-import smbus
+from smbus2 import SMBus
 import time
 bus = smbus.SMBus(1)
 address = 0x6b
