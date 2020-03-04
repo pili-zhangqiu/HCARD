@@ -53,6 +53,6 @@ def readSensorData():
 
 while True:
         SensorData = readSensorData()     
-        print SensorData
+        print(SensorData)
         #Output (-3980, 1206, 4994, 3, 100, 0)
         time.sleep(0)
