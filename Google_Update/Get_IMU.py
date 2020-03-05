@@ -51,8 +51,7 @@ def readSensorData():
 
         return AX, AY, AZ, GX, GY, GZ
 
-while True:
-        SensorData = readSensorData()     
-        print(SensorData)
-        #Output (-3980, 1206, 4994, 3, 100, 0)
-        time.sleep(0.05)
+#while True:
+SensorData = readSensorData()     
+#print(SensorData)
+        #time.sleep(0.05)
