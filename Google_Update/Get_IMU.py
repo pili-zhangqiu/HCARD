@@ -2,25 +2,25 @@ from smbus2 import SMBus
 import time
 bus = SMBus(1)
 address = 0x6b
-#address2 = 0x1e
+address2 = 0x1d
 
 #print bus.read_byte_data(address, 0x0f) # Output 61
 
 
-#CTRL1_XL 
-bus.write_byte_data(address,0x10,0b10100111)
+#CTRL1_XL
+bus.write_byte_data(address,0x10,0b10100111)	# Linear Accel - Control Register Combination 1 (Control Freq)
 
 #CTRL2_G 
-bus.write_byte_data(address,0x11,0xb669ec48)
+bus.write_byte_data(address,0x11,0xb669ec48)	# Angular Rate - Control Register Combination 2 (Control Freq)
 
 #CTRL5_C 
-bus.write_byte_data(address,0x14,0b01100100)
+bus.write_byte_data(address,0x14,0b01100100)	# Control Register 5 (Controlling only accel, gyro or both)
 
 #CTRL6_C 
-bus.write_byte_data(address,0x15,0b00100000)
+bus.write_byte_data(address,0x15,0b00100000)	# Angular Rate - Control Register 6 (Control Sensitivity)
 
 #CTRL7_G 
-bus.write_byte_data(address,0x16,0x44)
+bus.write_byte_data(address,0x16,0x44)		# Angular Rate - Control Register 7 (Filters for Gyro)
 
 
 #Convert Bytes to Number
@@ -51,8 +51,7 @@ def readSensorData():
 
         return AX, AY, AZ, GX, GY, GZ
 
-while True:
-        SensorData = readSensorData()     
-        print(SensorData)
-        #Output (-3980, 1206, 4994, 3, 100, 0)
-        time.sleep(0.05)
+#while True:
+SensorData = readSensorData()     
+#print(SensorData)
+        #time.sleep(0.05)
