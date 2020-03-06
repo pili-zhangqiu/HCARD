@@ -8,15 +8,15 @@ total_1 = 1000
 total_2 = 1000
 
 fieldnames = ["x_value", "total_1", "total_2"]
-name = datetime.now().strftime('%Y-%m-%d-%H-%M.csv')
-
-with open(name, 'w') as csv_file:
+#filename = datetime.now().strftime('%Y-%m-%d-%H-%M.csv') #name the file using timestamp
+filename = 'random_gen.csv'
+with open(filename, 'w') as csv_file:
     csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
     csv_writer.writeheader()
 
 while True:
 
-    with open(name, 'a') as csv_file:
+    with open(filename, 'a') as csv_file:
         csv_writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
 
         info = {
