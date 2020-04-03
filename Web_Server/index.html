@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <title>Graphs from CSVs</title>
+		<link rel='stylesheet' href='stylesheets/style.css' />
+		<link rel='stylesheet' href='stylesheets/bootstrap.min.css' />
+		<link rel='stylesheet' href='stylesheets/font-awesome.min.css' />
+
+		<!-- Load c3.css -->
+		<link href="stylesheets/c3.css" rel="stylesheet" type="text/css">
+
+		<!-- Load d3.js and c3.js -->
+		<script src="javascripts/d3.v3.min.js" charset="utf-8"></script>
+		<script src="javascripts/c3.min.js"></script>
+
+		<!-- Load papaparse.js -->
+    <script src="javascripts/papaparse.min.js"></script>
+
+    <!-- OTHERS -->
+    <!-- OLD -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <meta charset="utf-8" />
+    <title>Chart.js Example</title>
+    <!-- import plugin script -->
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+    <!-- Custom Intro -->
+    <style>
+        #top {
+          text-align: center;
+        }
+        a {
+          color: rgba(118,165,175, .9);
+        }
+        small {
+          color: white;
+        }
+        .logo {
+          font: 84px 'Arial Narrow', sans-serif;/* I picked this font because it's the closest looking 'web safe' font http://cssfontstack.com/ */
+          color: #282828;
+          text-transform: uppercase;
+          letter-spacing: -4px;
+        }
+
+        /* stuff for both words */
+        .logo span {
+          position: relative;
+        }
+        .logo span:before,
+        .logo span:after {
+          content: '';
+          position: absolute;
+          border-width: 32px;/* makes a nice, big 64px square */
+          border-style: solid;
+          border-color: transparent;
+          height: 0;
+          z-index: 10;
+        }
+
+        /* stuff for 1st word */
+        .logo .word1 {
+          color: rgba(118,165,175, .9);
+          margin-right: -38px;
+          transform: rotateY(180deg);/* using Prefix free */
+          display: inline-block;/* required for transform */
+          z-index: 10;/* stack 1st word on top */
+        }
+        .logo .word1:before {
+          right: -4px;/* would be left, but we flipped the word */
+          top: -9px;
+          border-top-color: white;/* match background color */
+          border-right-color: white;/* would be left, but we flipped the word */
+        }
+        .logo .word1:after {
+          left: 17px;/* would be right, but we flipped the word */
+          bottom: -15px;
+          border-bottom-color: white;
+          border-left-color: white;/* would be right, but we flipped the word */
+        }
+
+        /* stuff for 2nd word */
+        .logo .word2 {
+          z-index: 0;/* stack 2nd word below */
+        }
+        .logo .word2:before {
+          left: -4px;
+          top: -6px;
+          border-top-color: white;
+          border-left-color: white;
+        }
+        .logo .word2:after {
+          right: -4px;
+          bottom: 4px;
+          border-bottom-color: white;
+          border-right-color: white;
+        }
+    </style>
+
+    <!-- Custom Padding -->
+    <style>
+      h2 {
+        padding-right: 15px;
+        padding-left: 15px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+      }
+    </style>
+
+    <style>
+      h3 {
+        padding-right: 15px;
+        padding-left: 15px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+      }
+    </style>
+
+    <style>
+      h4 {
+        padding-right: 15px;
+        padding-left: 15px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+      }
+    </style>
+
+    <style>
+      p {
+        padding-right: 15px;
+        padding-left: 15px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+      }
+    </style>
+
+    <!-- Style for Top Navigation Bar -->
+    <style>
+        #top{
+            height: 600px;
+        }
+
+        #middle{
+            height: 1000px;
+        }
+
+        #bottom{
+            height: 1900px;
+        }
+
+        body {
+          margin: 0;
+          font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .topnav {
+          overflow: hidden;
+          background-color: #333;
+        }
+
+        .topnav a {
+          float: left;
+          display: block;
+          color: #f2f2f2;
+          text-align: center;
+          padding: 14px 16px;
+          text-decoration: none;
+          font-size: 17px;
+        }
+
+        .topnav a:hover {
+          background-color: rgba(118,165,175, .9);
+          color: white;
+        }
+
+        .topnav a.active {
+          background-color: #333;
+          color: white;
+        }
+
+        .topnav .icon {
+          display: none;
+        }
+
+        @media screen and (max-width: 600px) {
+          .topnav a:not(:first-child) {display: none;}
+          .topnav a.icon {
+            float: right;
+            display: block;
+          }
+        }
+
+        @media screen and (max-width: 600px) {
+          .topnav.responsive {position: relative;}
+          .topnav.responsive .icon {
+            position: absolute;
+            right: 0;
+            top: 0;
+          }
+          .topnav.responsive a {
+            float: none;
+            display: block;
+            text-align: left;
+          }
+        }
+    </style>
+
+    <!-- Style for Vertical Tabs -->
+    <style>
+      * {box-sizing: border-box}
+      body {font-family: "Lato", sans-serif;}
+
+      /* Style the tab */
+      .tab {
+        float: left;
+        border: 1px solid #ccc;
+        background-color: #f1f1f1;
+        width: 18%;
+        height: 1000px;
+      }
+
+      /* Style the buttons inside the tab */
+      .tab button {
+        display: block;
+        background-color: inherit;
+        color: black;
+        padding: 22px 16px;
+        width: 100%;
+        border: none;
+        outline: none;
+        text-align: left;
+        cursor: pointer;
+        transition: 0.3s;
+        font-size: 17px;
+      }
+
+      /* Change background color of buttons on hover */
+      .tab button:hover {
+        background-color: #ddd;
+      }
+
+      /* Create an active/current "tab button" class */
+      .tab button.active {
+        background-color: #ccc;
+      }
+
+      /* Style the tab content */
+      .tabcontent {
+        float: left;
+        padding: 0px 12px;
+        border: 1px solid #ccc;
+        width: 82%;
+        border-left: none;
+        height: 1000px;
+      }
+    </style>
+
+    <!-- Style for Shorter Vertical Tabs -->
+    <style>
+      * {box-sizing: border-box}
+      body {font-family: "Lato", sans-serif;}
+
+      /* Style the tab */
+      .svtab {
+        float: left;
+        border: 1px solid #ccc;
+        background-color: #f1f1f1;
+        width: 18%;
+        height: 1200px;
+      }
+
+      /* Style the buttons inside the tab */
+      .svtab button {
+        display: block;
+        background-color: inherit;
+        color: black;
+        padding: 22px 16px;
+        width: 100%;
+        border: none;
+        outline: none;
+        text-align: left;
+        cursor: pointer;
+        transition: 0.3s;
+        font-size: 17px;
+      }
+
+      /* Change background color of buttons on hover */
+      .svtab button:hover {
+        background-color: #ddd;
+      }
+
+      /* Create an active/current "tab button" class */
+      .svtab button.active {
+        background-color: #ccc;
+      }
+
+      /* Style the tab content */
+      .svtabcontent {
+        float: left;
+        padding: 0px 12px;
+        border: 1px solid #ccc;
+        width: 82%;
+        border-left: none;
+        height: 1000px;
+      }
+    </style>
+
+    <!-- Style for Horizontal Tabs -->
+    <style>
+    body {font-family: Arial;}
+
+    /* Style the tab */
+    .htab {
+      overflow: hidden;
+      border: 1px solid #ccc;
+      background-color: #f1f1f1;
+      width: 95%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Style the buttons inside the tab */
+    .htab button {
+      background-color: inherit;
+      float: left;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 14px 16px;
+      transition: 0.3s;
+      font-size: 17px;
+    }
+
+    /* Change background color of buttons on hover */
+    .htab button:hover {
+      background-color: #ddd;
+    }
+
+    /* Create an active/current tablink class */
+    .htab button.active {
+      background-color: rgba(118,165,175, .9);
+    }
+
+    /* Style the tab content */
+    .htabcontent {
+      display: none;
+      padding: 6px 12px;
+      border: 1px solid #ffffff;
+      border-top: none;
+    }
+    </style>
+
+    <!-- Style for Block Button -->
+    <style>
+      .block {
+        display: block;
+        width: 60%;
+        border: none;
+        background-color: #ccc;
+        color: black;
+        padding: 14px 28px;
+        font-size: 16px;
+        cursor: pointer;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .block:hover {
+        background-color: #ddd;
+        color: black;
+      }
+    </style>
+
+
+    <!-- Style for Header Block Button -->
+    <style>
+          .headblock {
+            display: block;
+            border: none;
+            width: 100%;
+            background-color: rgba(118,165,175, .9);
+            color: white;
+            padding: 14px 28px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+          }
+    </style>
+
+    <!-- Style for White Block -->
+    <style>
+      .whiteblock {
+        display: block;
+        width: 60%;
+        border: none;
+        background-color: white;
+        color: black;
+        font-size: 16px;
+        cursor: pointer;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    </style>
+
+<script>function timedRefresh(timeoutPeriod) {
+  setTimeout("location.reload(false);",timeoutPeriod);
+}</script>
+
+
+<script>function timedRefresh(timeoutPeriod) {
+  
+  $(window).scroll(function() {
+    sessionStorage.scrollTop = $(this).scrollTop();
+  });
+
+  $(document).ready(function() {
+    if (sessionStorage.scrollTop != "undefined") {
+      $(window).scrollTop(sessionStorage.scrollTop);
+    }
+  });
+
+  setTimeout("location.reload(false);",timeoutPeriod);
+}</script>
+
+<!-- Script for reload div -->
+<!--
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<script> 
+  $(document).ready(function(){
+  setInterval(function(){
+        $("#acc_chart").load("javascripts/create-acc-graph.js #acc_chart");   
+        var randomnumber = Math.floor(Math.random() * 100);
+        $('#acc_chart').text(
+                          'I am getting refreshed every 3 seconds..! Random Number ==> '
+                                  + randomnumber);      
+  }, 1000);
+  });
+</script>
+-->
+</head>
+
+<body onload="JavaScript:timedRefresh(3000000);">
+<!--<body> -->
+    <!-- Top Nav Bar -->
+    <div class="topnav" id="myTopnav">
+      <a href="#top">Home</a>
+      <a href="#middle">Raw Data from IMU</a>
+      <a href="#bottom">Jerk Scores</a>
+
+      <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+
+<div id="top">
+  <button class="headblock">What is this project about?</button>
+  <h1 class="logo">
+    <span class="word1">CEREBRAL</span>
+    <span class="word2">PALSY</span>
+  </h1>
+  <button class="whiteblock">
+    <p> Cerebral Palsy (CP) is the name given to a group of mostly congenital, lifelong conditions thataffect motor skills, muscle tone and movement. 
+    In UK, 1 in 400 babies born are diagnosed with CP. The earlier the condition is detected and diagnosed, the earlier treatment can start for the patient,improving their quality of life for the future. 
+    Thus, it is imperative that CP is detected as early as possible.
+    <br>
+    <br>
+
+    This project aims to quantify and provide a less subjective tool for clinicians to assess early signs of CP in babies as young as 8 months. In particular, this device measures quality of motion or smoothness through Jerk Scores.
+    Success of the project would translate in less misdiagnosed cases, especially in babies with subtle signs.
+    <br>
+    <br>
+
+    </p>
+    <p>PROJECT BY: Zoe Chu, Mun Han, Samradnyee Kolas, Ryan Satnarine, Xian Zhang and Pilar Zhang Qiu 
+    <br>
+    Imperial College London - HCARD 2020</p>
+</button>
+
+</div>
+
+<div id="middle">
+    <button class="headblock">Live Data of IMU</button>
+    <!-- Vertical Tabs -->
+    <h2>Analysis of raw values</h2>
+    <p>Here you can visualize the data for (1) accelerometer or (2) gyroscope data.
+      To view these values, click on the buttons inside the tabbed menu:</p>
+
+    <div class="tab">
+      <button class="tablinks" onclick="openTab(event, 'RawChart_Live')" id="defaultOpen">Live View</button>
+      <button class="tablinks" onclick="openTab(event, 'RawChart_Past')">History View</button>
+    </div>
+
+
+    <div id="RawChart_Live" class="tabcontent">
+      <h3>Live View</h3>
+      <p>Here you can access the raw IMU values (acceleration and angular orientation) live.</p>
+
+      <h4>Acc Graph</h4>
+      <div class="container">
+        <div id="acc_chart"></div>
+        <script src="javascripts/create-acc-graph.js"></script>
+      </div>
+
+      <h4>Gyro Graph</h4>
+      <div class="container">
+        <div id="gyro_chart"></div>
+        <script src="javascripts/create-gyro-graph.js"></script>
+      </div>
+    </div>
+
+    <div id="RawChart_Past" class="tabcontent">
+        <h3>Past History View</h3>
+        <p>Here you can access the history for the raw IMU values (acceleration and angular orientation).</p>
+        <h4>Graph</h4>
+      </div>
+
+    <script>
+        function myFunction() {
+            var x = document.getElementById("myTopnav");
+            if (x.className === "topnav") {
+            x.className += " responsive";
+            } else {
+            x.className = "topnav";
+            }
+      }
+    </script>
+
+    <!-- Script for Vertical Tabs -->
+    <script>
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+    // Get the element with id="defaultOpen" and click on it
+    document.getElementById("defaultOpen").click();
+    </script>
+
+    <!-- Script for Horizontal Tabs -->
+    <script>
+  function openHTabs(evt, hTab) {
+    var i, htabcontent, htablinks;
+    htabcontent = document.getElementsByClassName("htabcontent");
+    for (i = 0; i < htabcontent.length; i++) {
+      htabcontent[i].style.display = "none";
+    }
+    htablinks = document.getElementsByClassName("htablinks");
+    for (i = 0; i < htablinks.length; i++) {
+      htablinks[i].className = htablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(hTab).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
+    </script>
+
+</div>
+
+<div id="bottom">
+  <button class="headblock">Live Data of Jerk Scores</button>
+
+  <h2>Analysis of quality of motion</h2>
+  <p>Here you can visualize the data for (1) instant jerk, (2) instant jerk scores for each axes and (3) total instant jerk score.
+  </p>
+
+  <h4>Raw Jerk Graph</h4>
+  <div class="container">
+    <div id="rawjerk_chart"></div>
+    <script src="javascripts/create-rawjerk-graph.js"></script>      
+  </div>
+
+  <h4>Jerk Score Graph</h4>
+  <div class="container">
+    <div id="jScore_chart"></div>
+    <script src="javascripts/create-jScore-graph.js"></script>      
+  </div>
+
+  <h4>Final Jerk Score Graph</h4>
+  <div class="container">
+    <div id="fin_jScore_chart"></div>
+    <script src="javascripts/create-fin_jScore-graph.js"></script>      
+  </div>
+</div>
+
+
+</body>
+</html>
