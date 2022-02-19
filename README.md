@@ -1,5 +1,6 @@
 # HCARD
 **Cerebral Palsy Assessment Device - For Babies**
+
 This is the README for the "Peared with HINE" Baby Toy for Cerebral Palsy assessment, developed for the Human Centred Design of Assistive and Rehabilitation Devices module at Imperial College London. 
 
 **Authors:**
